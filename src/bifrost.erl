@@ -586,10 +586,22 @@ ftp_command(_Mod, Socket, State, size, _Arg) ->
     respond(Socket, 550),
     {ok, State};
 
+ftp_command(_, Socket, State, allo, _Arg) ->
+    % ignore allocate
+    respond(Socket, 200),
+    {ok, State};
+
 ftp_command(_, Socket, State, Command, _Arg) ->
-    error_logger:warning_report({bifrost, unrecognized_command, Command}),
+    error_logger:warning_report({bifrost, {client, peername(State)},
+                                        unrecognized_command, Command}),
     respond(Socket, 500),
     {ok, State}.
+
+peername(State) ->
+    case catch {ok, inet:peername(State#connection_state.control_socket)} of
+        {ok, {Peer, _}} -> Peer;
+        _ -> unknown_peer
+    end.
 
 write_fun(Socket, Fun) ->
     case Fun(1024) of
