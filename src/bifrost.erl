@@ -137,9 +137,6 @@ control_loop(HookPid, {SocketMod, RawSocket} = Socket, State) ->
     case SocketMod:recv(RawSocket, 0) of
         {ok, Input} ->
             {Command, Arg} = parse_input(Input),
-            error_logger:info_report({bifrost,
-                                        {client, peername(State)},
-                                        {Command, Arg}}),
             case ftp_command(Socket, State, Command, Arg) of
                 {ok, NewState} ->
                     if is_pid(HookPid) ->
